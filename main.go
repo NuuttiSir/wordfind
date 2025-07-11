@@ -15,9 +15,9 @@ func getFileLineLength(fileName string) int {
 	for fileScanner.Scan() {
 		lineCount++
 	}
-	fmt.Println("number of lines:", lineCount)
-	return lineCount
+	defer file.Close()
 
+	return lineCount
 }
 
 func getWordOnLineN(lineNumber int, fileName string) string {
@@ -30,6 +30,8 @@ func getWordOnLineN(lineNumber int, fileName string) string {
 			return fileScanner.Text()
 		}
 	}
+	defer file.Close()
+
 	return "Error"
 }
 
@@ -54,27 +56,119 @@ func getLongestWord(words []string) []string {
 	return wordSplittedToChars
 }
 
-func main() {
-	//TODO: vaihda myöhemmin johonkin
-	var korkeus int
-	var leveys int
+func fillBoardWithWords(words []string) [][]string {
+	leveys := getLenOfLongestWord(words)
+	korkeus := getLenOfLongestWord(words)
 
-	fmt.Println("Reading file words")
-	fileName := "words.txt"
-	/**content**/ _, err := os.ReadFile(fileName)
-	if err != nil {
-		panic(err)
+	board := makeBoard(leveys, korkeus)
+
+	for _, word := range words {
+		placed := false
+		attempts := 100
+		for attempts > 0 && !placed {
+			vertical := rand.Intn(2) == 0
+			var row, col int
+			if vertical {
+				row = rand.Intn(korkeus - len(word) + 1)
+				col = rand.Intn(leveys)
+			} else {
+				row = rand.Intn(korkeus)
+				col = rand.Intn(leveys - len(word) + 1)
+			}
+
+			if canPlaceWord(board, word, row, col, vertical) {
+				placeWord(board, word, row, col, vertical)
+				placed = true
+			}
+			attempts--
+		}
+		if !placed {
+			fmt.Println("Ei voitu laittaa sanaa:", word)
+		}
 	}
+
+	fillBoardBlankSpaces(board)
+
+	fmt.Println("\nBoard:")
+	for _, row := range board {
+		for _, ch := range row {
+			fmt.Printf("%s ", ch)
+		}
+		fmt.Println()
+	}
+
+	return board
+}
+
+func makeBoard(leveys, korkeus int) [][]string {
+	board := make([][]string, korkeus)
+	for i := range board {
+		board[i] = make([]string, leveys)
+		for j := range board[i] {
+			board[i][j] = " "
+		}
+	}
+	return board
+}
+
+func placeWord(board [][]string, word string, row, col int, vertical bool) {
+	if vertical {
+		for i, ch := range word {
+			board[row+i][col] = string(ch)
+		}
+	} else {
+		for i, ch := range word {
+			board[row][col+i] = string(ch)
+		}
+	}
+}
+
+func canPlaceWord(board [][]string, word string, row, col int, vertical bool) bool {
+	if vertical {
+		if row+len([]rune(word)) > len(board) {
+			return false
+		}
+		for i, ch := range word {
+			cell := board[row+i][col]
+			if cell != " " && cell != string(ch) {
+				return false
+			}
+		}
+	} else {
+		if col+len([]rune(word)) > len(board[0]) {
+			return false
+		}
+		for i, ch := range word {
+			cell := board[row][col+i]
+			if cell != " " && cell != string(ch) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func fillBoardBlankSpaces(board [][]string) {
+	for i := range board {
+		for y := range board[i] {
+			if board[i][y] == " " {
+				board[i][y] = "*"
+			}
+		}
+	}
+}
+
+func main() {
+	fileName := "words.txt"
 
 	lineCount := getFileLineLength(fileName)
 	var randomLines []int
-	wordCount := 10
-	for i := range wordCount {
+	wordCount := 15
+	for i := 0; i < wordCount; i++ {
 		randomLine := rand.Intn(lineCount)
 		randomLines = append(randomLines, randomLine)
 		i++
 	}
-	fmt.Println(randomLines)
 
 	var randWords []string
 	for i := range len(randomLines) {
@@ -84,28 +178,5 @@ func main() {
 	}
 	fmt.Println(randWords)
 
-	leveys = getLenOfLongestWord(randWords)
-	korkeus = getLenOfLongestWord(randWords)
-
-	board := make([][]string, korkeus)
-	for i := range board {
-		board[i] = make([]string, leveys)
-		for j := range board[i] {
-			board[i][j] = "[]"
-		}
-	}
-
-	// Put biggest word on board
-	// Get random point on y-axis
-	// start word on that
-	randomRow := rand.Intn(korkeus)
-	longestWord := getLongestWord(randWords)
-	for i, char := range longestWord {
-		board[randomRow][i] = string(char)
-	}
-
-	fmt.Println("\nBoard:")
-	for _, row := range board {
-		fmt.Println(strings.Join(row, ""))
-	}
+	fillBoardWithWords(randWords)
 }
