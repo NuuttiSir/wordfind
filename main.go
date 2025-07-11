@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"slices"
 	"strings"
 )
 
-func getFileLineLength(fileName string) int {
+func getFileLineLength(filename string) int {
 	lineCount := 0
-	file, _ := os.Open(fileName)
+	file, _ := os.Open(filename)
 	fileScanner := bufio.NewScanner(file)
 	for fileScanner.Scan() {
 		lineCount++
@@ -20,9 +21,9 @@ func getFileLineLength(fileName string) int {
 	return lineCount
 }
 
-func getWordOnLineN(lineNumber int, fileName string) string {
+func getWordOnLineN(lineNumber int, filename string) string {
 	lastLine := 0
-	file, _ := os.Open(fileName)
+	file, _ := os.Open(filename)
 	fileScanner := bufio.NewScanner(file)
 	for fileScanner.Scan() {
 		lastLine++
@@ -79,6 +80,7 @@ func fillBoardWithWords(words []string) [][]string {
 			if canPlaceWord(board, word, row, col, vertical) {
 				placeWord(board, word, row, col, vertical)
 				placed = true
+				fmt.Printf("Word %v starts in %v %v\n", word, row, col)
 			}
 			attempts--
 		}
@@ -88,16 +90,18 @@ func fillBoardWithWords(words []string) [][]string {
 	}
 
 	fillBoardBlankSpaces(board)
+	printBoard(board)
+	return board
+}
 
+func printBoard(board [][]string) {
 	fmt.Println("\nBoard:")
 	for _, row := range board {
 		for _, ch := range row {
-			fmt.Printf("%s ", ch)
+			fmt.Printf("[%s]", ch)
 		}
 		fmt.Println()
 	}
-
-	return board
 }
 
 func makeBoard(leveys, korkeus int) [][]string {
@@ -147,36 +151,84 @@ func canPlaceWord(board [][]string, word string, row, col int, vertical bool) bo
 	}
 	return true
 }
+func getRandomChar() rune {
+	charsList := []rune{}
+	for rune := 'a'; rune <= 'z'; rune++ {
+		charsList = append(charsList, rune)
+	}
+	charsList = append(charsList, 'ä', 'ö')
+	randInt := rand.Intn(len(charsList))
+	return charsList[randInt]
+}
 
 func fillBoardBlankSpaces(board [][]string) {
 	for i := range board {
 		for y := range board[i] {
 			if board[i][y] == " " {
-				board[i][y] = "*"
+				board[i][y] = string(getRandomChar())
 			}
 		}
 	}
 }
 
-func main() {
-	fileName := "words.txt"
+func removeItemFromList(list []string, item string) []string {
+	for i, other := range list {
+		if other == item {
+			return append(list[:i], list[i+1:]...)
+		}
+	}
+	return list
+}
 
-	lineCount := getFileLineLength(fileName)
-	var randomLines []int
+// func replaceFoundWordWithStars(word string) {
+// 	wordPos :=
+// }
+
+func getRandomLines(filename string) []int {
+	lineCount := getFileLineLength(filename)
+	randomLines := []int{}
 	wordCount := 15
 	for i := 0; i < wordCount; i++ {
 		randomLine := rand.Intn(lineCount)
 		randomLines = append(randomLines, randomLine)
 		i++
 	}
+	return randomLines
+}
 
-	var randWords []string
+func getRandomWords(filename string) []string {
+	randWords := []string{}
+	randomLines := getRandomLines(filename)
 	for i := range len(randomLines) {
-		randWord := getWordOnLineN(randomLines[i], fileName)
+		randWord := getWordOnLineN(randomLines[i], filename)
 		randWords = append(randWords, randWord)
 		i++
 	}
-	fmt.Println(randWords)
+	return randWords
+}
+
+func main() {
+	filename := "../wordfind/words.txt"
+
+	randWords := getRandomWords(filename)
 
 	fillBoardWithWords(randWords)
+
+	//Make copy of the word list I DONT KNOW WHY TODO: RESEARCH
+	wordListCopy := make([]string, len(randWords))
+	copy(wordListCopy, randWords)
+
+	input := ""
+	for len(wordListCopy) != 0 {
+		fmt.Print("What words are in the puzzle >")
+		fmt.Scan(&input)
+		if slices.Contains(randWords, input) {
+			fmt.Println("You found a word in the puzzle")
+			wordListCopy = removeItemFromList(wordListCopy, input)
+			// TODO: Replace right find with stars at the start with now
+			// replaceFoundWordWithStars(input)
+		} else {
+			fmt.Println("Try again")
+		}
+	}
 }
