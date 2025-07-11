@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"slices"
-	"strings"
 )
 
 func getFileLineLength(filename string) int {
@@ -46,23 +46,18 @@ func getLenOfLongestWord(words []string) int {
 	return len(longestWord)
 }
 
-func getLongestWord(words []string) []string {
-	longestWord := words[0]
-	for i := range words {
-		if len(longestWord) < len(words[i]) {
-			longestWord = words[i]
-		}
-	}
-	wordSplittedToChars := strings.Split(longestWord, "")
-	return wordSplittedToChars
-}
+// func getLongestWord(words []string) []string {
+// 	longestWord := words[0]
+// 	for i := range words {
+// 		if len(longestWord) < len(words[i]) {
+// 			longestWord = words[i]
+// 		}
+// 	}
+// 	wordSplittedToChars := strings.Split(longestWord, "")
+// 	return wordSplittedToChars
+// }
 
-func fillBoardWithWords(words []string) [][]string {
-	leveys := getLenOfLongestWord(words)
-	korkeus := getLenOfLongestWord(words)
-
-	board := makeBoard(leveys, korkeus)
-
+func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [][]string {
 	for _, word := range words {
 		placed := false
 		attempts := 100
@@ -88,9 +83,6 @@ func fillBoardWithWords(words []string) [][]string {
 			fmt.Println("Ei voitu laittaa sanaa:", word)
 		}
 	}
-
-	fillBoardBlankSpaces(board)
-	printBoard(board)
 	return board
 }
 
@@ -180,10 +172,6 @@ func removeItemFromList(list []string, item string) []string {
 	return list
 }
 
-// func replaceFoundWordWithStars(word string) {
-// 	wordPos :=
-// }
-
 func getRandomLines(filename string) []int {
 	lineCount := getFileLineLength(filename)
 	randomLines := []int{}
@@ -207,12 +195,63 @@ func getRandomWords(filename string) []string {
 	return randWords
 }
 
+func replaceFoundWordWithStars(board [][]string, word string) {
+	wordLen := len(word)
+
+	for row := range board {
+		for col := 0; col <= len(board[row])-wordLen; col++ {
+			match := true
+			for i := range wordLen {
+				if board[row][col+i] != string(word[i]) {
+					match = false
+					break
+				}
+			}
+			if match {
+				for i := range wordLen {
+					board[row][col+i] = "*"
+				}
+				return
+			}
+		}
+	}
+
+	for col := 0; col < len(board[0]); col++ {
+		for row := 0; row <= len(board)-wordLen; row++ {
+			match := true
+			for i := range wordLen {
+				if board[row+i][col] != string(word[i]) {
+					match = false
+					break
+				}
+			}
+			if match {
+				for i := range wordLen {
+					board[row+i][col] = "*"
+				}
+				return
+			}
+		}
+	}
+}
+
+func clearTerminal() {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+}
+
 func main() {
 	filename := "../wordfind/words.txt"
 
 	randWords := getRandomWords(filename)
+	leveys := getLenOfLongestWord(randWords)
+	korkeus := getLenOfLongestWord(randWords)
 
-	fillBoardWithWords(randWords)
+	board := makeBoard(leveys, korkeus)
+	board = fillBoardWithWords(board, randWords, leveys, korkeus)
+	fillBoardBlankSpaces(board)
+	printBoard(board)
 
 	//Make copy of the word list I DONT KNOW WHY TODO: RESEARCH
 	wordListCopy := make([]string, len(randWords))
@@ -223,10 +262,11 @@ func main() {
 		fmt.Print("What words are in the puzzle >")
 		fmt.Scan(&input)
 		if slices.Contains(randWords, input) {
-			fmt.Println("You found a word in the puzzle")
 			wordListCopy = removeItemFromList(wordListCopy, input)
-			// TODO: Replace right find with stars at the start with now
-			// replaceFoundWordWithStars(input)
+			replaceFoundWordWithStars(board, input)
+			clearTerminal()
+			fmt.Println("You found a word in the puzzle")
+			printBoard(board)
 		} else {
 			fmt.Println("Try again")
 		}
