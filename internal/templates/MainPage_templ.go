@@ -91,7 +91,7 @@ func InputWord() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<input type=\"text\" placeholder=\"Write word here\" style=\"padding: 0.5rem 1rem; font-size: 1.2rem; width: 300px; border: 1px solid #ccc; border-radius: 8px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<input name=\"word\" id=\"word-input\" type=\"text\" placeholder=\"Write word here\" style=\"padding: 0.5rem 1rem; font-size: 1.2rem; width: 300px; border: 1px solid #ccc; border-radius: 8px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
