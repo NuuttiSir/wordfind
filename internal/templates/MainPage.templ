@@ -1,0 +1,19 @@
+package templates
+
+templ MainPage(board [][]string) {
+    <html>
+        <head><title>Word Game</title></head>
+        <body>
+        <h1>WordFind Game</h1>
+        <div id="board">
+        for _, row := range board {
+            <div>
+                for _, letter := range row {
+                    <span class="tile">{letter}</span>
+                }
+            </div>
+        }
+        </div>
+    </body>
+    </html>
+}

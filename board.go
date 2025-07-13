@@ -11,6 +11,16 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [
 		attempts := 100
 		for attempts > 0 && !placed {
 			vertical := rand.Intn(2) == 0
+
+			// if vertical && len(word) > korkeus {
+			// 	fmt.Println("Word too tall to fit:", word)
+			// 	continue
+			// }
+			// if !vertical && len(word) > leveys {
+			// 	fmt.Println("Word too wide to fit:", word)
+			// 	continue
+			// }
+			//
 			var row, col int
 			if vertical {
 				row = rand.Intn(korkeus - len(word) + 1)
