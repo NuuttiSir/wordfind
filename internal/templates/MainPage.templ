@@ -1,19 +1,40 @@
 package templates
 
+templ BoardPrint(board [][]string) {
+	<div id="board" style="display: inline-block; font-family: monospace; font-size: 2rem;">
+		for _, row := range board {
+			<div style="line-height: 1.5;">
+				for _, letter := range row {
+					<span class="boardTile" style="display: inline-block; width: 1.5ch; text-align: center;">
+						{ letter }
+					</span>
+				}
+			</div>
+		}
+	</div>
+}
+
+templ InputWord() {
+	<input
+		name="word"
+		id="word-input"
+		type="text"
+		placeholder="Write word here"
+		style="padding: 0.5rem 1rem; font-size: 1.2rem; width: 300px; border: 1px solid #ccc; border-radius: 8px;"
+	/>
+}
+
 templ MainPage(board [][]string) {
-    <html>
-        <head><title>Word Game</title></head>
-        <body>
-        <h1>WordFind Game</h1>
-        <div id="board">
-        for _, row := range board {
-            <div>
-                for _, letter := range row {
-                    <span class="tile">{letter}</span>
-                }
-            </div>
-        }
-        </div>
-    </body>
-    </html>
+	<html>
+		<head>
+			<title>Word Game</title>
+		</head>
+		<body>
+			<h1>WordFind Game</h1>
+			<div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
+				@BoardPrint(board)
+				@InputWord()
+			</div>
+		</body>
+	</html>
 }
