@@ -6,10 +6,20 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"slices"
 
 	templates "github.com/NuuttiSir/wordfind/internal/templates"
 	_ "github.com/a-h/templ"
 )
+
+var words = getRandomWords("./words.txt")
+var leveys = getLenOfLongestWord(words)
+var korkeus = getLenOfLongestWord(words)
+var board = makeBoard(leveys, korkeus)
+
+type Board struct {
+	board [][]string
+}
 
 func main() {
 
@@ -18,25 +28,32 @@ func main() {
 	//wordsFile := "../wordfind/words.txt"
 	//TODO: make different languages
 	//Play(wordsFile)
+	board = fillBoardWithWords(board, words, leveys, korkeus)
+	fillBoardBlankSpaces(board)
 
 	http.HandleFunc("/", handler_HomePage)
+	http.HandleFunc("/submit", handler_Submit)
 	fmt.Println("Listening on 6969")
 	http.ListenAndServe(":6969", nil)
 }
 
 func handler_HomePage(w http.ResponseWriter, r *http.Request) {
-	words := getRandomWords("./words.txt")
-	leveys := getLenOfLongestWord(words)
-	korkeus := getLenOfLongestWord(words)
+	templates.MainPage(board).Render(r.Context(), w)
+}
 
-	board := makeBoard(leveys, korkeus)
-	board = fillBoardWithWords(board, words, leveys, korkeus)
-	fillBoardBlankSpaces(board)
-	err := templates.MainPage(board).Render(r.Context(), w)
-	if err != nil {
-		fmt.Println("VITTU")
+func handler_Submit(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	word := r.FormValue("word")
+	//for len(words) != 0 {
+	if slices.Contains(words, word) {
+		words = removeItemFromList(words, word)
+		replaceFoundWordWithStars(board, word)
+	} else {
+		fmt.Println("Try again")
 	}
-
+	templates.BoardPrint(board).Render(r.Context(), w)
+	//}
+	// fmt.Println("VOITTO")
 }
 
 func getFileLineLength(wordsFile string) int {
