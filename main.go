@@ -33,6 +33,7 @@ func main() {
 
 	http.HandleFunc("/", handler_HomePage)
 	http.HandleFunc("/submit", handler_Submit)
+	http.HandleFunc("/reset", handler_resetBoard)
 	fmt.Println("Listening on 6969")
 	http.ListenAndServe(":6969", nil)
 }
@@ -44,16 +45,31 @@ func handler_HomePage(w http.ResponseWriter, r *http.Request) {
 func handler_Submit(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	word := r.FormValue("word")
-	//for len(words) != 0 {
+
 	if slices.Contains(words, word) {
 		words = removeItemFromList(words, word)
 		replaceFoundWordWithStars(board, word)
 	} else {
 		fmt.Println("Try again")
 	}
+
 	templates.BoardPrint(board).Render(r.Context(), w)
-	//}
-	// fmt.Println("VOITTO")
+	if len(words) == 0 {
+		//Render something winning like
+		fmt.Println("VOITTO")
+	}
+}
+
+func handler_resetBoard(w http.ResponseWriter, r *http.Request) {
+	// words = getRandomWords("./words.txt")
+	// leveys = getLenOfLongestWord(words)
+	// korkeus = getLenOfLongestWord(words)
+	// board = makeBoard(leveys, korkeus)
+	// board = fillBoardWithWords(board, words, leveys, korkeus)
+	// fillBoardBlankSpaces(board)
+	// fmt.Println("Board reset")
+	fmt.Println("Clearing terminal")
+	//templates.ResetBoard(board).Render(r.Context(), w)
 }
 
 func getFileLineLength(wordsFile string) int {

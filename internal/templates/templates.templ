@@ -14,6 +14,12 @@ templ BoardPrint(board [][]string) {
 	</div>
 }
 
+templ ResetBoard(board [][]string) {
+	<form hx-post="/reset" hx-target="#board" hx-swap="outerHTML">
+		<button type="submit">RESET BOARD</button>
+	</form>
+}
+
 templ InputWord() {
 	<form
 		hx-post="/submit"
@@ -42,6 +48,7 @@ templ MainPage(board [][]string) {
 			<div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
 				@BoardPrint(board)
 				@InputWord()
+				@ResetBoard(board)
 			</div>
 		</body>
 	</html>
