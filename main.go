@@ -31,14 +31,14 @@ func main() {
 	board = fillBoardWithWords(board, words, leveys, korkeus)
 	fillBoardBlankSpaces(board)
 
-	http.HandleFunc("/", handler_HomePage)
+	http.HandleFunc("/", handler_homePage)
 	http.HandleFunc("/submit", handler_Submit)
 	http.HandleFunc("/reset", handler_resetBoard)
 	fmt.Println("Listening on 6969")
 	http.ListenAndServe(":6969", nil)
 }
 
-func handler_HomePage(w http.ResponseWriter, r *http.Request) {
+func handler_homePage(w http.ResponseWriter, r *http.Request) {
 	templates.MainPage(board).Render(r.Context(), w)
 }
 
@@ -53,23 +53,24 @@ func handler_Submit(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Try again")
 	}
 
-	templates.BoardPrint(board).Render(r.Context(), w)
 	if len(words) == 0 {
-		//Render something winning like
-		fmt.Println("VOITTO")
+    	templates.WinPage().Render(r.Context(), w)
+		fmt.Println("Voitto")
+		return
 	}
+
+	templates.PlayPage(board).Render(r.Context(), w)
 }
 
 func handler_resetBoard(w http.ResponseWriter, r *http.Request) {
-	// words = getRandomWords("./words.txt")
-	// leveys = getLenOfLongestWord(words)
-	// korkeus = getLenOfLongestWord(words)
-	// board = makeBoard(leveys, korkeus)
-	// board = fillBoardWithWords(board, words, leveys, korkeus)
-	// fillBoardBlankSpaces(board)
-	// fmt.Println("Board reset")
-	fmt.Println("Clearing terminal")
-	//templates.ResetBoard(board).Render(r.Context(), w)
+	words = getRandomWords("./words.txt")
+	leveys = getLenOfLongestWord(words)
+	korkeus = getLenOfLongestWord(words)
+	board = makeBoard(leveys, korkeus)
+	board = fillBoardWithWords(board, words, leveys, korkeus)
+	fillBoardBlankSpaces(board)
+	fmt.Println("Board reset")
+	templates.PlayPage(board).Render(r.Context(), w)
 }
 
 func getFileLineLength(wordsFile string) int {

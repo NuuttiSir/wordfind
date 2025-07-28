@@ -15,15 +15,37 @@ templ BoardPrint(board [][]string) {
 }
 
 templ ResetBoard(board [][]string) {
-	<form hx-post="/reset" hx-target="#board" hx-swap="outerHTML">
+	<form hx-post="/reset" hx-target="#PlayPage" hx-swap="outerHTML">
 		<button type="submit">RESET BOARD</button>
 	</form>
+}
+
+
+templ PlayAgain() {
+    <button onclick="window.location.href = '/'">Play Again</button>
+}
+
+
+
+templ WinPage() {
+    <div id="playPage">
+        <h1 style="text-align: center;">You Won!</h1>
+        <form hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
+            <button type="submit">Play Again</button>
+        </form>
+    </div>
+}
+
+
+templ MenuScreen() {
+	//Select a game mode Easy, medium Hard
+	// Select a game language
 }
 
 templ InputWord() {
 	<form
 		hx-post="/submit"
-		hx-target="#board"
+		hx-target="#playPage"
 		hx-swap="outerHTML"
 		hx-on::after-request="document.getElementById('word-input').value = ''"
 	>
@@ -37,6 +59,14 @@ templ InputWord() {
 	</form>
 }
 
+templ PlayPage(board [][]string) {
+    <div id="playPage">
+        @BoardPrint(board)
+        @InputWord()
+        @ResetBoard(board)
+    </div>
+}
+
 templ MainPage(board [][]string) {
 	<html>
 		<head>
@@ -45,11 +75,9 @@ templ MainPage(board [][]string) {
 		</head>
 		<body>
 			<h1 style="text-align: center;">WordFind Game</h1>
-			<div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
-				@BoardPrint(board)
-				@InputWord()
-				@ResetBoard(board)
-			</div>
+            <div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
+                @PlayPage(board)
+            </div>
 		</body>
 	</html>
 }
