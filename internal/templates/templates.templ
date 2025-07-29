@@ -15,31 +15,36 @@ templ BoardPrint(board [][]string) {
 }
 
 templ ResetBoard(board [][]string) {
-	<form hx-post="/reset" hx-target="#PlayPage" hx-swap="outerHTML">
+	<form class="reset-button" hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
 		<button type="submit">RESET BOARD</button>
 	</form>
 }
 
-
-templ PlayAgain() {
-    <button onclick="window.location.href = '/'">Play Again</button>
-}
-
-
-
 templ WinPage() {
-    <div id="playPage">
-        <h1 style="text-align: center;">You Won!</h1>
-        <form hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
-            <button type="submit">Play Again</button>
-        </form>
-    </div>
+	<div id="playPage">
+		<h1 style="text-align: center;">You Won!</h1>
+		<form hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
+			<button type="submit">Play Again</button>
+		</form>
+	</div>
 }
-
 
 templ MenuScreen() {
 	//Select a game mode Easy, medium Hard
 	// Select a game language
+	<div>
+		<h1>Menu</h1>
+		<p>
+			You can choose between 3 gamemodes: Easy, Medium and Hard
+			<br/>
+			In easy mode you have to find 5 words
+			<br/>
+			In medium mode you have to find 10 words
+			<br/>
+			In hard mode you have to find 15 words
+			<br/>
+		</p>
+	</div>
 }
 
 templ InputWord() {
@@ -60,24 +65,28 @@ templ InputWord() {
 }
 
 templ PlayPage(board [][]string) {
-    <div id="playPage">
-        @BoardPrint(board)
-        @InputWord()
-        @ResetBoard(board)
-    </div>
+	<div id="playPage" style="text-align: center;">
+		@BoardPrint(board)
+		@InputWord()
+		@ResetBoard(board)
+	</div>
 }
 
 templ MainPage(board [][]string) {
 	<html>
 		<head>
 			<script src="https://unpkg.com/htmx.org"></script>
+			<link rel="stylesheet" href="../../static/styles.css"/>
 			<title>Word Game</title>
 		</head>
 		<body>
 			<h1 style="text-align: center;">WordFind Game</h1>
-            <div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
-                @PlayPage(board)
-            </div>
+			<div>
+				@MenuScreen()
+			</div>
+			<div style="display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
+				@PlayPage(board)
+			</div>
 		</body>
 	</html>
 }

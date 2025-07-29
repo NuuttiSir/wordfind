@@ -29,6 +29,7 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [
 			attempts--
 		}
 		if !placed {
+			// TODO: make so it tries a new word
 			removeItemFromList(words, word)
 			fmt.Println("Ei voitu laittaa sanaa:", word)
 		}

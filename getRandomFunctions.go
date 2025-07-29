@@ -16,10 +16,9 @@ func getRandomLines(wordsFile string) []int {
 	lineCount := getFileLineLength(wordsFile)
 	randomLines := []int{}
 	wordCount := 15
-	for i := 0; i < wordCount; i++ {
+	for range wordCount {
 		randomLine := rand.Intn(lineCount)
 		randomLines = append(randomLines, randomLine)
-		i++
 	}
 	return randomLines
 }

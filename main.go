@@ -55,7 +55,6 @@ func handler_Submit(w http.ResponseWriter, r *http.Request) {
 
 	if len(words) == 0 {
     	templates.WinPage().Render(r.Context(), w)
-		fmt.Println("Voitto")
 		return
 	}
 
