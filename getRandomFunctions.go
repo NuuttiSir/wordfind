@@ -26,10 +26,18 @@ func getRandomLines(wordsFile string) []int {
 func getRandomWords(wordsFile string) []string {
 	randWords := []string{}
 	randomLines := getRandomLines(wordsFile)
-	for i := range len(randomLines) {
+	for i := range randomLines {
 		randWord := getWordOnLineN(randomLines[i], wordsFile)
 		randWords = append(randWords, randWord)
-		i++
 	}
 	return randWords
+}
+
+func getRandomLine(wordsFile string) int {
+	lineCount := getFileLineLength(wordsFile)
+	return rand.Intn(lineCount)
+}
+
+func getRandomWord(wordsFile string) string {
+	return getWordOnLineN(getRandomLine(wordsFile), wordsFile)
 }

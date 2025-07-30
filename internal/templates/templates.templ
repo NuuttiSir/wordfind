@@ -23,7 +23,7 @@ templ ResetBoard(board [][]string) {
 templ WinPage() {
 	<div id="playPage">
 		<h1 style="text-align: center;">You Won!</h1>
-		<form hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
+		<form class="reset-button" hx-post="/reset" hx-target="#playPage" hx-swap="outerHTML">
 			<button type="submit">Play Again</button>
 		</form>
 	</div>
@@ -44,7 +44,19 @@ templ MenuScreen() {
 			In hard mode you have to find 15 words
 			<br/>
 		</p>
+		<button>EASY</button>
+		<button>MEDIUM</button>
+		<button>HARD</button>
 	</div>
+}
+
+templ EasyBoardPage() {
+}
+
+templ MediumBoardPage() {
+}
+
+templ HardBoardPage() {
 }
 
 templ InputWord() {

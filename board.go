@@ -30,7 +30,11 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [
 		}
 		if !placed {
 			// TODO: make so it tries a new word
+			// NOTE: ATM it just repeats the last word
+			// Maybe add arandom word?
 			removeItemFromList(words, word)
+			fmt.Println("Removed word: ", word)
+			fmt.Println(words)
 			fmt.Println("Ei voitu laittaa sanaa:", word)
 		}
 	}
