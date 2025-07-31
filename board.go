@@ -3,12 +3,19 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
-func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [][]string {
-	for _, word := range words {
+func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) ([][]string, []string) {
+	remainingWords := make([]string, len(words))
+	copy(remainingWords, words)
+	placedWords := []string{}
+
+	for i := 0; i < len(remainingWords); i++ {
+		word := strings.ToLower(remainingWords[i]) // Ensure consistent case
 		placed := false
 		attempts := 100
+
 		for attempts > 0 && !placed {
 			vertical := rand.Intn(2) == 0
 
@@ -24,6 +31,7 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [
 			if canPlaceWord(board, word, row, col, vertical) {
 				placeWord(board, word, row, col, vertical)
 				placed = true
+				placedWords = append(placedWords, word)
 				fmt.Printf("Word %v starts in %v %v\n", word, row, col)
 			}
 			attempts--
@@ -32,13 +40,12 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) [
 			// TODO: make so it tries a new word
 			// NOTE: ATM it just repeats the last word
 			// Maybe add arandom word?
-			removeItemFromList(words, word)
-			fmt.Println("Removed word: ", word)
-			fmt.Println(words)
 			fmt.Println("Ei voitu laittaa sanaa:", word)
+			remainingWords = append(remainingWords[:i], remainingWords[i+1:]...)
+			i--
 		}
 	}
-	return board
+	return board, placedWords
 }
 
 func printBoard(board [][]string) {
@@ -71,14 +78,16 @@ func fillBoardBlankSpaces(board [][]string) {
 	}
 }
 
-func replaceFoundWordWithStars(board [][]string, word string) {
+func replaceFoundWordWithStars(board [][]string, word string) bool {
+	word = strings.ToLower(word)
 	wordLen := len(word)
+	found := false
 
 	for row := range board {
 		for col := 0; col <= len(board[row])-wordLen; col++ {
 			match := true
 			for i := range wordLen {
-				if board[row][col+i] != string(word[i]) {
+				if strings.ToLower(board[row][col+i]) != string(word[i]) {
 					match = false
 					break
 				}
@@ -87,7 +96,8 @@ func replaceFoundWordWithStars(board [][]string, word string) {
 				for i := range wordLen {
 					board[row][col+i] = "*"
 				}
-				return
+				found = true
+				return found
 			}
 		}
 	}
@@ -96,7 +106,7 @@ func replaceFoundWordWithStars(board [][]string, word string) {
 		for row := 0; row <= len(board)-wordLen; row++ {
 			match := true
 			for i := range wordLen {
-				if board[row+i][col] != string(word[i]) {
+				if strings.ToLower(board[row+i][col]) != string(word[i]) {
 					match = false
 					break
 				}
@@ -105,8 +115,10 @@ func replaceFoundWordWithStars(board [][]string, word string) {
 				for i := range wordLen {
 					board[row+i][col] = "*"
 				}
-				return
+				found = true
+				return found
 			}
 		}
 	}
+	return found
 }

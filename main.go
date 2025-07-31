@@ -7,35 +7,61 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strings"
 
 	templates "github.com/NuuttiSir/wordfind/internal/templates"
 	_ "github.com/a-h/templ"
 )
 
-var words = getRandomWords("./words.txt")
-var leveys = getLenOfLongestWord(words)
-var korkeus = getLenOfLongestWord(words)
-var board = makeBoard(leveys, korkeus)
-
-type Board struct {
-	board [][]string
-}
+var (
+	allWords     []string // All words that were placed on the board
+	currentWords []string // Words still to be found
+	leveys       int
+	korkeus      int
+	board        [][]string
+)
 
 func main() {
 
 	const port = "6969"
 
-	//wordsFile := "../wordfind/words.txt"
+	initializeGame()
+
 	//TODO: make different languages
-	//Play(wordsFile)
-	board = fillBoardWithWords(board, words, leveys, korkeus)
-	fillBoardBlankSpaces(board)
 
 	http.HandleFunc("/", handler_homePage)
 	http.HandleFunc("/submit", handler_Submit)
 	http.HandleFunc("/reset", handler_resetBoard)
+
 	fmt.Println("Listening on 6969")
 	http.ListenAndServe(":6969", nil)
+}
+
+func initializeGame() {
+	words := getRandomWords("./words.txt")
+	leveys = getLenOfLongestWord(words) + 2
+	korkeus = getLenOfLongestWord(words) + 2
+
+	// Ensure minimum board size
+	if leveys < 10 {
+		leveys = 10
+	}
+	if korkeus < 10 {
+		korkeus = 10
+	}
+
+	board = makeBoard(leveys, korkeus)
+	var placedWords []string
+	board, placedWords = fillBoardWithWords(board, words, leveys, korkeus)
+	fillBoardBlankSpaces(board)
+
+	// Only track words that were actually placed
+	allWords = make([]string, len(placedWords))
+	copy(allWords, placedWords)
+	currentWords = make([]string, len(placedWords))
+	copy(currentWords, placedWords)
+
+	fmt.Printf("Game initialized with %d words\n", len(currentWords))
 }
 
 func handler_homePage(w http.ResponseWriter, r *http.Request) {
@@ -44,42 +70,49 @@ func handler_homePage(w http.ResponseWriter, r *http.Request) {
 
 func handler_Submit(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	word := r.FormValue("word")
+	word := strings.ToLower(strings.TrimSpace(r.FormValue("word")))
 
-	if slices.Contains(words, word) {
-		words = removeItemFromList(words, word)
-		replaceFoundWordWithStars(board, word)
-	} else {
-		fmt.Println("Try again")
-	}
-
-	if len(words) == 0 {
-    	templates.WinPage().Render(r.Context(), w)
+	if word == "" {
+		templates.PlayPage(board).Render(r.Context(), w)
 		return
 	}
 
+	// Check if word exists in current words (words still to be found)
+	if slices.Contains(currentWords, word) {
+		currentWords = removeItemFromList(currentWords, word)
+		wordFound := replaceFoundWordWithStars(board, word)
+
+		if wordFound {
+			fmt.Printf("Word found: %s\n", word)
+		} else {
+			fmt.Printf("Word %s was in list but not found on board\n", word)
+		}
+	} else {
+		fmt.Printf("Word not found or already guessed: %s\n", word)
+	}
+
+	// Check win condition
+	if len(currentWords) == 0 {
+		templates.WinPage().Render(r.Context(), w)
+		return
+	}
 	templates.PlayPage(board).Render(r.Context(), w)
 }
 
 func handler_resetBoard(w http.ResponseWriter, r *http.Request) {
-	words = getRandomWords("./words.txt")
-	leveys = getLenOfLongestWord(words)
-	korkeus = getLenOfLongestWord(words)
-	board = makeBoard(leveys, korkeus)
-	board = fillBoardWithWords(board, words, leveys, korkeus)
-	fillBoardBlankSpaces(board)
-	fmt.Println("Board reset")
+	fmt.Println("Board reset requested")
+	initializeGame()
 	templates.PlayPage(board).Render(r.Context(), w)
 }
 
 func getFileLineLength(wordsFile string) int {
 	lineCount := 0
 	file, _ := os.Open(wordsFile)
+	defer file.Close()
 	fileScanner := bufio.NewScanner(file)
 	for fileScanner.Scan() {
 		lineCount++
 	}
-	defer file.Close()
 
 	return lineCount
 }
