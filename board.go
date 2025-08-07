@@ -37,9 +37,6 @@ func fillBoardWithWords(board [][]string, words []string, leveys, korkeus int) (
 			attempts--
 		}
 		if !placed {
-			// TODO: make so it tries a new word
-			// NOTE: ATM it just repeats the last word
-			// Maybe add arandom word?
 			fmt.Println("Ei voitu laittaa sanaa:", word)
 			remainingWords = append(remainingWords[:i], remainingWords[i+1:]...)
 			i--

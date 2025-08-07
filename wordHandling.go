@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"strings"
 )
 
 func getWordOnLineN(lineNumber int, wordsFile string) string {
@@ -30,13 +31,13 @@ func getLenOfLongestWord(words []string) int {
 	return len(longestWord)
 }
 
-// func getLongestWord(words []string) []string {
-// 	longestWord := words[0]
-// 	for i := range words {
-// 		if len(longestWord) < len(words[i]) {
-// 			longestWord = words[i]
-// 		}
-// 	}
-// 	wordSplittedToChars := strings.Split(longestWord, "")
-// 	return wordSplittedToChars
-// }
+func getLongestWord(words []string) []string {
+	longestWord := words[0]
+	for i := range words {
+		if len(longestWord) < len(words[i]) {
+			longestWord = words[i]
+		}
+	}
+	wordSplittedToChars := strings.Split(longestWord, "")
+	return wordSplittedToChars
+}

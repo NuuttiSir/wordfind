@@ -13,6 +13,7 @@ import (
 	_ "github.com/a-h/templ"
 )
 
+// TODO: Change to struct or smthg
 var (
 	allWords     []string // All words that were placed on the board
 	currentWords []string // Words still to be found
@@ -42,7 +43,6 @@ func initializeGame() {
 	leveys = getLenOfLongestWord(words) + 2
 	korkeus = getLenOfLongestWord(words) + 2
 
-	// Ensure minimum board size
 	if leveys < 10 {
 		leveys = 10
 	}
